@@ -1,0 +1,78 @@
+/*
+ * ledandintrupt.c
+ *
+ *  Created on: Mar 21, 2024
+ *      Author: 01226
+ */
+typedef unsigned char   u8;
+/*defining section*/
+#define PORTA        *((volatile u8*)0x3B)
+#define PINA         *((volatile u8*)0x39)
+#define DDRA         *((volatile u8*)0x3A)
+
+#define PORTD        *((volatile u8*)0x32)
+#define PIND         *((volatile u8*)0x30)
+#define DDRD         *((volatile u8*)0x31)
+
+#define SREG         *((volatile u8*)0x5F) /*GENERAL INTRUPT ENABLE BIT7*/
+#define GICR         *((volatile u8*)0x5B) /*INTRUPT ENABLE BIT6*/
+#define GIFR         *((volatile u8*)0x5A) /*INTRUPT FLAG BIT6*/
+#define MCUCR        *((volatile u8*)0x55) /*SENSE MODE BIT1 AND 0*/
+
+
+
+#define P0    0
+#define P1    1
+#define P2    2
+#define P3    3
+#define P4    4
+#define P5    5
+#define P6    6
+#define P7    7
+
+#define SET_BIT(reg,bit)          reg |=(1<<bit)
+#define CLR_BIT(reg,bit)          reg &=(~(1<<bit))
+#define TOG_BIT(reg,bit)          reg ^=(1<<bit)
+#define GET_BIT(reg,bit)          (reg& (1<<bit))>>bit
+#define IS_BIT_SET(reg,bit)      (reg&(1<<bit))>>bit
+#define IS_BIT_CLR(reg,bit)      !((reg&(1<<bit))>>bit)
+
+/*led connected in porta p1*/
+/*push button is connected in portd p2*/
+
+
+void __vector_1(void) __attribute__((signal, used));
+void __vector_1(void){
+	if(IS_BIT_CLR(PIND,P2))
+	{
+		SET_BIT(PORTA,P1);
+	}else{
+		CLR_BIT(PORTA,P1);
+	}
+
+}
+
+
+
+
+
+
+int main(void)
+{
+	SET_BIT(DDRA,P1);/*SET PIN 1 IN PORTA TO BE OUTPUT*/
+	CLR_BIT(DDRD,P2);/*SET PIN 2 IN PORTD TO BE INPUT*/
+
+	SET_BIT(SREG,P7);/*ENABLE THE GENERAL INTRUPT*/
+	SET_BIT(GICR,P6);/*INTUPT ENABLE*/
+	SET_BIT(GIFR,P6);/*CLEAR THE  INTRUPT FLAG*/
+
+	SET_BIT(MCUCR,P0);/*SET THE SENSING TO falling edge */
+	CLR_BIT(MCUCR,P1);
+
+
+
+	while(1)
+	{
+	}
+	return 0;
+}
